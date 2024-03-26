@@ -8,23 +8,16 @@ def top_students(mongo_collection):
     """
     Prints all students in a collection sorted by average score.
     """
-    students = mongo_collection.aggregate(
+    return mongo_collection.aggregate(
         [
+            {"$unwind": "$topics"},
             {
-                '$project': {
-                   '_id': 1,
-                   'name': 1
-                   'averageScore': {
-                       '$avg': {
-                           '$avg': '$topics.score',
-                        },
-                    },
-                    'topics': 1,
-                },
+                "$group": {
+                    "_id": "$_id",
+                    "name": {"$first": "$name"},
+                    "averageScore": {"$avg": "$topics.score"},
+                }
             },
-            {
-                '$sort': {'averageScore': -1},
-            },
-            ]
-        )
-        return students
+            {"$sort": {"averageScore": -1}},
+        ]
+    )
